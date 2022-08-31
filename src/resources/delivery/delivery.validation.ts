@@ -26,5 +26,10 @@ const update = Joi.object({
     .required()
     .valid(...Object.values(deliveryStatus)),
 });
+const patchStatus = Joi.object({
+  status: Joi.string()
+    .required()
+    .valid(...Object.values(deliveryStatus)),
+});
 
-export default { create, update };
+export default { create, update, patchStatus };

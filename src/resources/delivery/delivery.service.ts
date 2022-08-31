@@ -57,6 +57,26 @@ class DeliveryService {
       throw new Error(error.message);
     }
   }
+  public async updateStatus(delivery: Partial<IDelivery>): Promise<IDelivery> {
+    try {
+      const newDelivery = await this.deliveryModel.findOneAndUpdate(
+        { delivery_id: delivery.delivery_id },
+        { status: delivery.status }
+      );
+      if (newDelivery !== null) {
+        const dbDelivery = await this.deliveryModel
+          .findOne({
+            delivery_id: newDelivery.delivery_id,
+          })
+          .populate('package_id');
+        return dbDelivery!;
+      } else {
+        throw new Error('could not find delivery with given delivery_id');
+      }
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
 
   public async allDeliveries(): Promise<IDelivery[]> {
     try {

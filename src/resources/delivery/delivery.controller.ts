@@ -30,6 +30,11 @@ class DeliveryController implements IController {
       this.UpdateDelivery
     );
     this.router.delete(`${this.path}/:id`, this.DestroyDelivery);
+    this.router.patch(
+      `${this.path}/:id`,
+      ValidationMiddleware(validate.patchStatus),
+      this.UpdateDeliveryStatus
+    );
   }
 
   private CreateDelivery = async (
@@ -47,7 +52,11 @@ class DeliveryController implements IController {
       });
     } catch (error: any) {
       next(
-        new HttpException(400, constants.CREATE_RESOURCE_ERROR_MSG, error.message)
+        new HttpException(
+          400,
+          constants.CREATE_RESOURCE_ERROR_MSG,
+          error.message
+        )
       );
     }
   };
@@ -63,17 +72,46 @@ class DeliveryController implements IController {
         ...req.body,
       };
       const updatedDelivery = await this.DeliveryService.update(payload);
-      res
-        .status(201)
-        .send({
-          code: 200,
-          success: true,
-          messages: [constants.UPDATE_RESOURCE_SUCCESS_MSG],
-          resource: updatedDelivery,
-        });
+      res.status(201).send({
+        code: 200,
+        success: true,
+        messages: [constants.UPDATE_RESOURCE_SUCCESS_MSG],
+        resource: updatedDelivery,
+      });
     } catch (error: any) {
       next(
-        new HttpException(400, constants.UPDATE_RESOURCE_ERROR_MSG, error.message)
+        new HttpException(
+          400,
+          constants.UPDATE_RESOURCE_ERROR_MSG,
+          error.message
+        )
+      );
+    }
+  };
+  private UpdateDeliveryStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> => {
+    try {
+      const payload = {
+        delivery_id: req.params.id,
+        ...req.body,
+      };
+      const updatedDelivery = await this.DeliveryService.updateStatus(payload);
+      res.status(201).send({
+        code: 200,
+        success: true,
+        messages: [constants.UPDATE_RESOURCE_SUCCESS_MSG],
+        resource: updatedDelivery,
+      });
+    } catch (error: any) {
+      next(
+        new HttpException(
+          400,
+          constants.UPDATE_RESOURCE_ERROR_MSG,
+          error.message
+        )
       );
     }
   };
@@ -83,7 +121,9 @@ class DeliveryController implements IController {
     next: NextFunction
   ): Promise<Response | void> => {
     try {
-      const singleDelivery = await this.DeliveryService.getSingle(req.params.id);
+      const singleDelivery = await this.DeliveryService.getSingle(
+        req.params.id
+      );
       res.status(200).send({
         success: true,
         resource: singleDelivery,
