@@ -50,7 +50,6 @@ class App {
 
   public startEngine(): typeof Server {
     const Server = this.express.listen(this.port, () => {
-      console.error(new Date());
       console.log(
         `🚀🚀 backend engine is started and listening on port ${this.port}👌🏾✅`
       );

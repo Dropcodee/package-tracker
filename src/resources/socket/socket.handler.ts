@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { TSocketMessage } from '@/resources/socket/socket.type';
 import IDelivery from '@/resources/delivery/delivery.interface';
 import DeliveryService from '@/resources/delivery/delivery.service';
-
+import constants from '@/utils/constants';
 class SocketHandler {
   public connection;
   public deliveryService = new DeliveryService();
@@ -19,7 +19,11 @@ class SocketHandler {
       } else if (reqBody.eventType === 'LOCATION_CHANGED') {
         this.HandleLocationUpdate(reqBody);
       } else {
-        this.connection.send('wrong format of message');
+        const errMsg = JSON.stringify({
+          success: false,
+          messages: ['bad event type, event doesnt exist.'],
+        });
+        this.connection.send(errMsg);
       }
     } else {
       const errMsg = JSON.stringify({
@@ -33,16 +37,38 @@ class SocketHandler {
 
   private async HandleStatusUpdate(message: Partial<IDelivery>): Promise<void> {
     try {
-      console.log(`Event Triggered => `, message);
-      const payload = {
-        delivery_id: message.delivery_id,
-        status: message.status,
-      };
+      let payload = {};
+      if (message.status === constants.DELIVERY_STATUS.PICKED_UP) {
+        payload = {
+          delivery_id: message.delivery_id,
+          status: message.status,
+          pickup_time: Date(),
+        };
+      } else if (message.status === constants.DELIVERY_STATUS.IN_TRANSIT) {
+        payload = {
+          delivery_id: message.delivery_id,
+          status: message.status,
+          start_time: Date(),
+        };
+      } else if (
+        message.status === constants.DELIVERY_STATUS.DELIVERED ||
+        message.status === constants.DELIVERY_STATUS.FAILED
+      ) {
+        payload = {
+          delivery_id: message.delivery_id,
+          status: message.status,
+          end_time: Date(),
+        };
+      }
+      console.log(`Event Triggered => `, payload);
       const delivery = await this.deliveryService.updateStatus(payload);
       const deliveryStr = JSON.stringify(delivery);
       this.connection.send(deliveryStr);
     } catch (error: any) {
-      const errMsg = JSON.stringify(error.message);
+      const errMsg = JSON.stringify({
+        success: false,
+        messages: [error.message],
+      });
       this.connection.send(errMsg);
     }
   }

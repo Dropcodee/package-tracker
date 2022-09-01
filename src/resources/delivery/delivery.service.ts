@@ -61,7 +61,7 @@ class DeliveryService {
     try {
       const newDelivery = await this.deliveryModel.findOneAndUpdate(
         { delivery_id: delivery.delivery_id },
-        { status: delivery.status }
+        { ...delivery }
       );
       if (newDelivery !== null) {
         const dbDelivery = await this.deliveryModel
