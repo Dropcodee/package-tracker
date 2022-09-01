@@ -14,7 +14,6 @@ class App {
   constructor(controllers: IController[], port: number) {
     this.express = express();
     this.port = port;
-
     this.initializeMiddleware();
     this.initializeDatabase();
     this.initializeControllers(controllers);
@@ -49,13 +48,14 @@ class App {
     this.express.use(ErrorMiddleware);
   }
 
-  public startEngine(): void {
-    this.express.listen(this.port, () => {
+  public startEngine(): typeof Server {
+    const Server = this.express.listen(this.port, () => {
       console.error(new Date());
       console.log(
         `🚀🚀 backend engine is started and listening on port ${this.port}👌🏾✅`
       );
     });
+    return Server
   }
 }
 
