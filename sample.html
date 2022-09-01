@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="" />
+  </head>
+  <body>
+    <button onclick="TriggerStatusUpdate('picked-up')">Picked Up</button>
+    <button onclick="TriggerStatusUpdate('in-transit')">In Transit</button>
+    <button onclick="TriggerStatusUpdate('delivered')">Delivered</button>
+    <button onclick="TriggerStatusUpdate('failed')">Failed</button>
+    <div id="mainElement"></div>
+    <script src="" async defer></script>
+    <script>
+      let uiData = document.getElementById('mainElement');
+      const ws = new WebSocket('ws://localhost:1337');
+      ws.onopen = () => {
+        console.log('we are connected');
+      };
+      ws.onmessage = (event) => {
+        console.log(event.data);
+      };
+      function TriggerStatusUpdate(status) {
+        const payload = {
+          delivery_id: 'da949853-b58a-4aa9-972a-a63d09c92ac4',
+          status,
+          eventType: 'STATUS_CHANGED',
+        };
+        ws.send(JSON.stringify(payload));
+      }
+    </script>
+  </body>
+</html>
